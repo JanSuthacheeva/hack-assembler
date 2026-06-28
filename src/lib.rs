@@ -24,7 +24,7 @@ fn assemble(input: &str) -> Result<String, Box<dyn Error>> {
     let instructions = cleaner::clean_program(input.lines().collect());
      
     // first pass
-    let mut symbol_table: SymbolTable = symbol_table::init_table();
+    let mut symbol_table = SymbolTable::new();
     symbol_table.add_labels(&instructions);
 
     // second pass

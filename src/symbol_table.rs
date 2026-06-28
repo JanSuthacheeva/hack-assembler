@@ -5,7 +5,9 @@ pub struct SymbolTable {
     counter: u32
 }
 
-pub fn init_table() -> SymbolTable {
+impl SymbolTable {
+
+    pub fn new() -> SymbolTable {
         let mut table: HashMap<String, u32> = HashMap::new();
     
         table.insert(String::from("R0"), 0);
@@ -36,9 +38,8 @@ pub fn init_table() -> SymbolTable {
             table,
             counter: 16
         }
-}
+    }
 
-impl SymbolTable {
     pub fn add_labels(&mut self, instructions: &Vec<String>) {
         let mut line: u32 = 0;
         for instruction in instructions {
@@ -57,5 +58,39 @@ impl SymbolTable {
             self.counter += 1;
         }
         format!("{value}")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn new_returns_new_table() {
+        let mut st = SymbolTable::new();
+        assert_eq!("5", st.get_value(&"R5".into()));
+        assert_eq!("16384", st.get_value(&"SCREEN".into()));
+    }
+
+    #[test]
+    fn returns_right_existing_value() {
+        let mut st = SymbolTable::new();
+        assert_eq!(String::from("3"), st.get_value(&String::from("THIS")));
+    }
+
+    #[test]
+    fn adds_label() {
+        let mut st = SymbolTable::new();
+        let instructions = vec![String::from("M=M+D"), String::from("(LOOP)"), String::from("@20")];
+        st.add_labels(&instructions);
+        assert!(st.table.contains_key(&String::from("LOOP")));
+        assert_eq!("1", st.get_value(&"LOOP".into()));
+    }
+
+    #[test]
+    fn returns_right_new_value() {
+        let mut st = SymbolTable::new();
+        assert_eq!("16", st.get_value(&String::from("TEST")));
+        assert_eq!("17", st.get_value(&String::from("TESTTWO")));
     }
 }
