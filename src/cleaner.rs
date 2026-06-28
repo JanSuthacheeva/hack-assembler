@@ -5,16 +5,10 @@ pub fn clean_program(lines: Vec<&str>) -> Vec<&str> {
     for l in lines {
         match l.split_once(delimiter) {
             Some((line, _)) => {
-                let cleaned_line = line.trim();
-                if !cleaned_line.is_empty() {
-                    instructions.push(cleaned_line);
-                }
+                push_if_not_empty(&mut instructions, line);
             },
             None => {
-                let cleaned_line = l.trim();
-                if !cleaned_line.is_empty() {
-                    instructions.push(cleaned_line);
-                }
+                push_if_not_empty(&mut instructions, l);
             }
         }
     }
@@ -23,9 +17,9 @@ pub fn clean_program(lines: Vec<&str>) -> Vec<&str> {
 
 
 // Use this when lifetimes are clear
-//fn push_if_not_empty(instructions: &mut Vec<&str>, line: &str)  {
-//    let cleaned_line = line.trim();
-//    if !cleaned_line.is_empty() {
-//        instructions.push(cleaned_line);
-//    }
-//}
+fn push_if_not_empty<'a>(instructions: &mut Vec<&'a str>, line: &'a str)  {
+    let cleaned_line = line.trim();
+    if !cleaned_line.is_empty() {
+        instructions.push(cleaned_line);
+    }
+}
