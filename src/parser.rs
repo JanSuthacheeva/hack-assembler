@@ -85,3 +85,35 @@ fn is_variable_instruction(line: &str) -> Option<String> {
 fn replace_line(value: &str) -> String {
     format!("@{value}")
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn parse_works() {
+        assert_eq!("1110110000010000", parse("D=A").transform().unwrap());
+        assert_eq!("0000000000000101", parse("@5").transform().unwrap());
+        assert_eq!("1110011111011001", parse("MD=D+1;JGT").transform().unwrap());
+        assert_eq!("1110101010000111", parse("0;JMP").transform().unwrap());
+    }
+
+    #[test]
+    fn parse_overflow() {
+        assert!(parse("@9999999").transform().is_err());
+    }
+
+
+    #[test]
+    fn parse_error_on_malformed() {
+        assert!(parse("D = XXX").transform().is_err());
+    }
+
+    #[test]
+    fn parse_program_works() {
+        let mut st = SymbolTable::new();
+        let program = vec!["(LOOP)".into(), "@LOOP".into(), "D=A".into()];
+        st.add_labels(&program);
+        assert_eq!("0000000000000000\n1110110000010000", parse_program(st, program).unwrap());
+    }
+}
