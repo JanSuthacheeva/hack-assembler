@@ -13,13 +13,13 @@ impl Instruction {
         match self {
             Instruction::A(s) => {
                 let num: u16 = s[1..].trim().parse()?;
-                Ok(format!("0{:015b}", num))
+                Ok(format!("0{num:015b}"))
             }
             Instruction::C(c) => {
                 let comp: &str = codes::comp(&c.comp)?;
-                let dest: &str = codes::dest(&c.dest)?;
-                let jump: &str = codes::jump(&c.jump)?;
-                Ok(format!("111{}{}{}", comp, dest, jump))
+                let dest: &str = codes::dest(c.dest.as_deref())?;
+                let jump: &str = codes::jump(c.jump.as_deref())?;
+                Ok(format!("111{comp}{dest}{jump}"))
             }
         }
     }
@@ -32,7 +32,7 @@ struct C {
 }
 
 fn parse(input: &str) -> Instruction {
-    if input.starts_with("@") {
+    if input.starts_with('@') {
         return Instruction::A(input.to_string());
     }
     let (dest, rest) = if let Some((first, second)) = input.split_once('=') {
@@ -51,14 +51,14 @@ fn parse(input: &str) -> Instruction {
 pub fn parse_program(mut symbol_table: SymbolTable, program: Vec<String>) -> Result<String, Box<dyn Error>> {
     let mut result = String::new();
     for line in program {
-        if line.starts_with("(") {
+        if line.starts_with('(') {
             continue;
         }
         // check and substitude var
         let raw_line = match is_variable_instruction(&line) {
             Some(var) => {
                 let value = symbol_table.get_value(&var);
-                replace_line(value)
+                replace_line(&value)
             },
             None => line.clone()
         };
@@ -75,13 +75,13 @@ pub fn parse_program(mut symbol_table: SymbolTable, program: Vec<String>) -> Res
 }
 
 fn is_variable_instruction(line: &str) -> Option<String> {
-    if line.starts_with("@") && line.chars().nth(1).is_some_and(|c| !c.is_numeric())
-        && let Some(var) = line.strip_prefix("@") {
+    if line.starts_with('@') && line.chars().nth(1).is_some_and(|c| !c.is_numeric())
+        && let Some(var) = line.strip_prefix('@') {
             return Some(String::from(var));
     }
     None
 }
 
-fn replace_line(value: String) -> String {
+fn replace_line(value: &str) -> String {
     format!("@{value}")
 }

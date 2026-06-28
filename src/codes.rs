@@ -34,8 +34,8 @@ pub fn comp(comp: &str) -> Result<&str, Box<dyn Error>> {
     }
 }
 
-pub fn jump(jump: &Option<String>) -> Result<&str, Box<dyn Error>> {
-    match jump.as_deref() {
+pub fn jump(jump: Option<&str>) -> Result<&'static str, Box<dyn Error>> {
+    match jump {
         None => Ok("000"),
         Some("JGT") => Ok("001"),
         Some("JEQ") => Ok("010"),
@@ -48,8 +48,8 @@ pub fn jump(jump: &Option<String>) -> Result<&str, Box<dyn Error>> {
     }
 }
 
-pub fn dest(dest: &Option<String>) -> Result<&str, Box<dyn Error>> {
-    match dest.as_deref() {
+pub fn dest(dest: Option<&str>) -> Result<&'static str, Box<dyn Error>> {
+    match dest {
         None => Ok("000"),
         Some("M") => Ok("001"),
         Some("D") => Ok("010"),
@@ -61,3 +61,4 @@ pub fn dest(dest: &Option<String>) -> Result<&str, Box<dyn Error>> {
         Some(d) => Err(format!("{d} is not a valid dest value").into()),
     }
 }
+
