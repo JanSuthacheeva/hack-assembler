@@ -12,6 +12,14 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>>{
 
     let input = fs::read_to_string(config.input_file)?;
 
+    let output = assemble(&input)?;
+
+    fs::write(config.output_file, output)?;
+
+    Ok(())
+}
+
+fn assemble(input: &str) -> Result<String, Box<dyn Error>> {
     // clean the lines vec from empty lines and comments
     let instructions = cleaner::clean_program(input.lines().collect());
      
@@ -22,9 +30,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>>{
     // second pass
     let output: String = parser::parse_program(symbol_table, instructions)?;
 
-    fs::write(config.output_file, &output)?;
-
-    Ok(())
+    Ok(output)
 }
 
 pub struct Config {
