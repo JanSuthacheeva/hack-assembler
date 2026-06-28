@@ -1,25 +1,60 @@
 
-pub fn clean_program(lines: Vec<&str>) -> Vec<&str> {
-    let mut instructions: Vec<&str> = vec![];
+pub fn clean_program(lines: Vec<&str>) -> Vec<String> {
+    let mut instructions: Vec<String> = vec![];
     let delimiter = "//";
     for l in lines {
         match l.split_once(delimiter) {
             Some((line, _)) => {
-                push_if_not_empty(&mut instructions, line);
+                let s: String = line.chars().filter(|c| !c.is_whitespace()).collect();
+                push_if_not_empty(&mut instructions, s);
             },
             None => {
-                push_if_not_empty(&mut instructions, l);
+                let s: String = l.chars().filter(|c| !c.is_whitespace()).collect();
+                push_if_not_empty(&mut instructions, s);
             }
         }
     }
     instructions
 }
 
+fn push_if_not_empty(instructions: &mut Vec<String>, line: String)  {
+    if !line.is_empty() {
+        instructions.push(line);
+    }
+}
 
-// Use this when lifetimes are clear
-fn push_if_not_empty<'a>(instructions: &mut Vec<&'a str>, line: &'a str)  {
-    let cleaned_line = line.trim();
-    if !cleaned_line.is_empty() {
-        instructions.push(cleaned_line);
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+
+    #[test]
+    fn strips_full_comment_line() {
+        let input = vec!["// Hi","D=A"];
+        assert_eq!(vec!["D=A"], clean_program(input));
+    }
+
+    #[test]
+    fn strips_comment_after_line() {
+        let input = vec!["D=A // Hi"];
+        assert_eq!(vec!["D=A"], clean_program(input));
+    }
+
+    #[test]
+    fn handles_no_comment() {
+        let input = vec!["D=A", "M=D"];
+        assert_eq!(vec!["D=A", "M=D"], clean_program(input));
+    }
+
+    #[test]
+    fn handles_blank_line() {
+        let input = vec!["", "M=D"];
+        assert_eq!(vec!["M=D"], clean_program(input));
+    }
+
+    #[test]
+    fn deletes_internal_blank_spaces() {
+        let input = vec!["M=D", "M = M + D"];
+        assert_eq!(vec!["M=D", "M=M+D"], clean_program(input));
     }
 }

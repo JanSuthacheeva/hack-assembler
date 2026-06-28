@@ -39,7 +39,7 @@ pub fn init_table() -> SymbolTable {
 }
 
 impl SymbolTable {
-    pub fn add_labels(&mut self, instructions: &Vec<&str>) {
+    pub fn add_labels(&mut self, instructions: &Vec<String>) {
         let mut line: u32 = 0;
         for instruction in instructions {
             if let Some(label) = instruction.strip_prefix("(")

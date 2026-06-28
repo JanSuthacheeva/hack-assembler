@@ -48,19 +48,19 @@ fn parse(input: &str) -> Instruction {
     Instruction::C(C { dest, comp, jump })
 }
 
-pub fn parse_program(mut symbol_table: SymbolTable, program: Vec<&str>) -> Result<String, Box<dyn Error>> {
+pub fn parse_program(mut symbol_table: SymbolTable, program: Vec<String>) -> Result<String, Box<dyn Error>> {
     let mut result = String::new();
     for line in program {
         if line.starts_with("(") {
             continue;
         }
         // check and substitude var
-        let raw_line = match is_variable_instruction(line) {
+        let raw_line = match is_variable_instruction(&line) {
             Some(var) => {
                 let value = symbol_table.get_value(&var);
                 replace_line(value)
             },
-            None => String::from(line)
+            None => line.clone()
         };
 
         let instruction: Instruction = parse(&raw_line);
