@@ -77,3 +77,75 @@ impl Config {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn happy_path_no_flags() {
+        let args = [String::from("test"), String::from("input.asm")]; 
+        let config = Config::build(&args).unwrap();
+        assert_eq!(PathBuf::from("input.asm"), config.input_file);
+        assert_eq!(PathBuf::from("input.hack"), config.output_file);
+    }
+
+    #[test]
+    fn happy_path_output_flag_after_input() {
+        let args = [String::from("test"), String::from("input.asm"), String::from("--output"), String::from("test.hack")]; 
+        let config = Config::build(&args).unwrap();
+        assert_eq!(PathBuf::from("input.asm"), config.input_file);
+        assert_eq!(PathBuf::from("test.hack"), config.output_file);
+    }
+
+    #[test]
+    fn happy_path_o_flag_after_input() {
+        let args = [String::from("test"), String::from("input.asm"), String::from("-o"), String::from("test.hack")]; 
+        let config = Config::build(&args).unwrap();
+        assert_eq!(PathBuf::from("input.asm"), config.input_file);
+        assert_eq!(PathBuf::from("test.hack"), config.output_file);
+    }
+
+    #[test]
+    fn happy_path_o_flag_before_input() {
+        let args = [String::from("test"), String::from("-o"), String::from("test.hack"), String::from("input.asm")]; 
+        let config = Config::build(&args).unwrap();
+        assert_eq!(PathBuf::from("input.asm"), config.input_file);
+        assert_eq!(PathBuf::from("test.hack"), config.output_file);
+    }
+
+    #[test]
+    fn input_file_not_asm() {
+        let args = [String::from("test"), String::from("input.notasm")]; 
+        let config = Config::build(&args);
+        assert!(config.is_err());
+    }
+
+    #[test]
+    fn too_many_args() {
+        let args = [String::from("test"), String::from("input.asm"), String::from("input2.asm")]; 
+        let config = Config::build(&args);
+        assert!(config.is_err());
+    }
+
+    #[test]
+    fn unknown_flag() {
+        let args = [String::from("test"), String::from("input.asm"), String::from("--unknown")]; 
+        let config = Config::build(&args);
+        assert!(config.is_err());
+    }
+
+    #[test]
+    fn no_output_provided() {
+        let args = [String::from("test"), String::from("input.asm"), String::from("--output")]; 
+        let config = Config::build(&args);
+        assert!(config.is_err());
+    }
+
+    #[test]
+    fn no_input_provided() {
+        let args = [String::from("test"), String::from("--output"), String::from("input.hack")]; 
+        let config = Config::build(&args);
+        assert!(config.is_err());
+    }
+}
