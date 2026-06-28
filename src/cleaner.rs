@@ -3,17 +3,14 @@ pub fn clean_program(lines: Vec<&str>) -> Vec<String> {
     let mut instructions: Vec<String> = vec![];
     let delimiter = "//";
     for l in lines {
-        match l.split_once(delimiter) {
-            Some((line, _)) => {
-                let s: String = line.chars().filter(|c| !c.is_whitespace()).collect();
-                push_if_not_empty(&mut instructions, s);
-            },
-            None => {
-                let s: String = l.chars().filter(|c| !c.is_whitespace()).collect();
-                push_if_not_empty(&mut instructions, s);
-            }
-        }
+        let code = match l.split_once(delimiter) {
+            Some((before, _)) => before,
+            None => l,
+        };
+        let s: String = code.chars().filter(|c| !c.is_whitespace()).collect();
+        push_if_not_empty(&mut instructions, s);
     }
+
     instructions
 }
 
