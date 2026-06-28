@@ -37,15 +37,39 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn build(args: &[String]) -> Result<Config, &'static str> {
+    pub fn build(args: &[String]) -> Result<Config, Box<dyn Error>> {
+        let mut output_file: Option<String> = None;
+        let mut input_file: Option<String> = None;
+
         if args.len() < 2 {
-            return Err("not enough arguments");
+            return Err("not enough arguments".into());
         }
-        let input_file = args[1].clone();
-        let output_file = match input_file.strip_suffix(".asm") {
-            Some(stem) => format!("{stem}.hack"),
-            None => return Err("input must be a .asm file"),
-        };
+        let mut iter = args.iter().skip(1);
+        while let Some(arg) = iter.next() {
+            match arg.as_str() {
+                "--output" | "-o" => {
+                    let value = iter.next().ok_or("missing value for --output")?;
+                    output_file = Some(String::from(value));
+                }
+                _ => { 
+                    if arg.starts_with('-') {
+
+                        return Err(format!("unknown argument: {arg}").into());
+                    } 
+                    if input_file.is_some() {
+                        return Err("too many arguments".into());
+                    }
+                    input_file = Some(arg.clone());
+                }
+            }
+        }
+        let input_file = input_file.ok_or("no input file")?;
+
+        let stem = input_file
+            .strip_suffix(".asm")
+            .ok_or("input must be a .asm file")?;
+        let output_file = output_file
+            .unwrap_or_else(|| format!("{stem}.hack"));
 
         Ok(Config {
             input_file: input_file.into(),
